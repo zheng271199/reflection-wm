@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>快乐算命模拟器</title>
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+body{
+  background:#f5efe1;
+  color:#4a3b2a;
+  font-family:"KaiTi","STKaiti","Microsoft YaHei",serif;
+  line-height:1.9;
+  padding:28px 18px;
+  /* 开元通宝SVG暗纹替换 */
+  background-image:
+    radial-gradient(circle at 50% 10%, rgba(180,150,90,0.18), transparent 60%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><defs><pattern id='kaiyuan' x='0' y='0' width='160' height='160' patternUnits='userSpaceOnUse'><circle cx='80' cy='80' r='42' fill='none' stroke='%23b59768' stroke-width='2'/><circle cx='80' cy='80' r='14' fill='none' stroke='%23b59768' stroke-width='2'/><text x='80' y='50' text-anchor='middle' fill='%23b59768' font-size='16' font-family='KaiTi'>开</text><text x='80' y='110' text-anchor='middle' fill='%23b59768' font-size='16' font-family='KaiTi'>元</text><text x='44' y='86' text-anchor='middle' fill='%23b59768' font-size='16' font-family='KaiTi'>通</text><text x='116' y='86' text-anchor='middle' fill='%23b59768' font-size='16' font-family='KaiTi'>宝</text></pattern></defs><rect width='100%' height='100%' fill='url(%23kaiyuan)' fill-opacity='0.07'/></svg>");
+  background-size:cover,160px 160px;
+  background-blend-mode:multiply;
+}
+.wrap{
+  max-width:640px;
+  margin:0 auto;
+}
+h1{
+  text-align:center;
+  color:#3b2a18;
+  letter-spacing:6px;
+  font-weight:bold;
+  margin-bottom:14px;
+  font-size:26px;
+  text-shadow:0 1px 0 rgba(255,255,255,0.6);
+}
+.desc{
+  text-align:center;
+  color:#7a6548;
+  font-size:15px;
+  margin-bottom:34px;
+  padding:14px 18px;
+  border-left:3px solid #b59768;
+  border-right:3px solid #b59768;
+  background:rgba(255,250,235,0.6);
+  border-radius:6px;
+}
+.question{
+  border:1px solid #d4af37;
+  border-radius:16px;
+  padding:22px;
+  margin-bottom:20px;
+  background:rgba(255,251,240,0.85);
+  box-shadow:0 4px 14px rgba(212,175,55,0.15);
+}
+.question p{
+  margin-bottom:16px;
+  color:#3b2a18;
+  font-size:16px;
+  font-weight:bold;
+}
+label{
+  display:block;
+  padding:11px 14px;
+  border-radius:12px;
+  margin:9px 0;
+  cursor:pointer;
+  border:1px solid transparent;
+  background:rgba(245,235,210,0.5);
+  transition:0.25s;
+  color:#4a3b2a;
+}
+label:hover{
+  background:rgba(230,210,170,0.85);
+  border-color:#d4af37;
+  transform:translateX(4px);
+}
+input[type="radio"]{
+  margin-right:10px;
+  accent-color:#d4af37;
+}
+#submitBtn{
+  width:100%;
+  padding:15px;
+  border:2px solid #d4af37;
+  background:linear-gradient(135deg,#e8d9b4,#c9ad77);
+  color:#3b2a18;
+  font-size:17px;
+  letter-spacing:4px;
+  border-radius:14px;
+  margin:12px 0;
+  cursor:pointer;
+  font-family:"KaiTi","STKaiti",serif;
+  box-shadow:0 6px 18px rgba(212,175,55,0.25);
+}
+#submitBtn:hover{
+  background:linear-gradient(135deg,#f2e4c2,#d6b882);
+  box-shadow:0 6px 22px rgba(212,175,55,0.35);
+}
+#resetBtn{
+  width:100%;
+  padding:14px;
+  border:1px dashed #d4af37;
+  background:rgba(255,251,240,0.7);
+  color:#705838;
+  font-size:16px;
+  letter-spacing:3px;
+  border-radius:14px;
+  cursor:pointer;
+  font-family:"KaiTi","STKaiti",serif;
+  display:none;
+}
+#resetBtn:hover{
+  background:rgba(245,233,210,0.9);
+}
+/* 卷轴样式结果框 + 金边 */
+#result{
+  display:none;
+  border-radius:8px;
+  padding:32px 28px;
+  margin-top:22px;
+  background:rgba(255,251,240,0.92);
+  color:#3b2a18;
+  line-height:2;
+  font-size:16px;
+  border:3px solid #d4af37;
+  box-shadow:0 6px 20px rgba(212,175,55,0.22);
+}
+.tip{
+  margin-top:34px;
+  font-size:13px;
+  color:#8a7558;
+  text-align:center;
+  padding-top:16px;
+  border-top:1px dashed #c9b891;
+}
+/* 起卦加载动画 铜钱金边 */
+.loading-wrap{
+  display:none;
+  text-align:center;
+  padding:20px;
+}
+.coin-loader{
+  width:60px;
+  height:60px;
+  margin:0 auto 12px;
+  border:3px solid #d4af37;
+  border-radius:50%;
+  position:relative;
+  animation: coinRotate 1.2s linear infinite;
+}
+.coin-loader::after{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  background:#d4af37;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+}
+.load-text{
+  color:#8a7558;
+  letter-spacing:3px;
+}
+@keyframes coinRotate{
+  0%{transform:rotate(0deg);}
+  100%{transform:rotate(360deg);}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1><strong>玄鉴命格 · 福分窥测</strong></h1>
+  <div class="desc">
+    须知八字格局仅为参考，气运随德行、选择流转，尽人事，方可待天命。
+  </div>
+  <div class="question">
+    <p>1. 姓氏为先天根基，观字形笔画，你属于？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：按康熙字典笔画计算，非简体笔画</p>
+    <label><input type="radio" name="q1" value="10">1–6 画，字简气清</label>
+    <label><input type="radio" name="q1" value="7">7–12 画，中正平和</label>
+    <label><input type="radio" name="q1" value="4">13–18 画，藏纳厚重</label>
+    <label><input type="radio" name="q1" value="2">18 画以上，繁字载深</label>
+  </div>
+  <div class="question">
+    <p>2. 四时定元，落地之时便承月令五行，你降生属于哪一季？</p>
+    <label><input type="radio" name="q2" value="10">春令木发，清阳初展</label>
+    <label><input type="radio" name="q2" value="7">夏令火盛，正阳蒸腾</label>
+    <label><input type="radio" name="q2" value="4">秋令金凝，敛气收机</label>
+    <label><input type="radio" name="q2" value="2">冬令水伏，沉机待发</label>
+  </div>
+  <div class="question">
+    <p>3. 昼夜分阴阳，降生时辰定清浊之气，你本命属于？</p>
+    <label><input type="radio" name="q3" value="10">旦时（日出清晨）｜阳气升腾，灵明启窍</label>
+    <label><input type="radio" name="q3" value="7">日中（午间白昼）｜正阳当空，气盛外放</label>
+    <label><input type="radio" name="q3" value="4">暮时（日落黄昏）｜阴阳交替，气机含敛</label>
+    <label><input type="radio" name="q3" value="2">夜时（夜半深宵）｜阴静谧藏，暗蓄元机</label>
+  </div>
+  <div class="question">
+    <p>4.居所立方位，常居之地纳一方气场，你的常住方位为？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：以自己长期生活城市，相对出生地的方位判断</p>
+    <label><input type="radio" name="q4" value="10">东方｜木主生发，灵气舒展</label>
+    <label><input type="radio" name="q4" value="7">南方｜火主明耀，阳气升腾</label>
+    <label><input type="radio" name="q4" value="4">西方｜金主肃敛，静藏玄机</label>
+    <label><input type="radio" name="q4" value="2">北方｜水主潜蓄，底蕴沉幽</label>
+  </div>
+  <div class="question">
+    <p>5. 痣为气血凝结之标记，观身上痣的带给你的感应？</p>
+    <label><input type="radio" name="q5" value="10">痣隐而润，零星点缀，藏而不扰</label>
+    <label><input type="radio" name="q5" value="7">分布散淡，无强烈感受，平平如常</label>
+    <label><input type="radio" name="q5" value="4">痣色偏沉，聚于一处，气息敛伏</label>
+    <label><input type="radio" name="q5" value="2">痣醒目突出，一眼便见，气向外显</label>
+  </div>
+  <div class="question">
+    <p>6.骨为一身之支架，藏先天根基格局，你的骨相禀赋更贴近哪一类？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：不是胖瘦皮肉，感受骨骼给人的整体感觉，凭直觉判断</p>
+    <label><input type="radio" name="q6" value="10">骨清而秀，骨架舒展，骨藏于肉</label>
+    <label><input type="radio" name="q6" value="7">骨肉匀称，不突不露，中和稳当</label>
+    <label><input type="radio" name="q6" value="4">骨势偏沉，骨架厚重，内敛敦实</label>
+    <label><input type="radio" name="q6" value="2">骨相显露，棱角分明，气向外扬</label>
+  </div>
+  <div class="question">
+    <p>7.声由丹田元神而出，闻声可观内里气机，你的本音特质是？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：指放松自然说话的声音，不是刻意压低或者拔高</p>
+    <label><input type="radio" name="q7" value="10">音清悠远，沉而不浊，余韵安稳</label>
+    <label><input type="radio" name="q7" value="7">声调平和，快慢有度，气机和顺</label>
+    <label><input type="radio" name="q7" value="4">声偏厚重，沉缓内敛，不轻易扬</label>
+    <label><input type="radio" name="q7" value="2">音急清亮，起落分明，神气外显</label>
+  </div>
+  <div class="question">
+    <p>8.年柱为根，血脉承祖上福荫，你所承袭的祖基气韵是？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：看家族代代沉淀的底蕴，不只看当下贫富，含家风、福报助力</p>
+    <label><input type="radio" name="q8" value="10">祖德绵长，荫气深厚，自有托举之力</label>
+    <label><input type="radio" name="q8" value="7">家风平实，根基安稳，无大起伏牵绊</label>
+    <label><input type="radio" name="q8" value="4">祖基单薄，助力有限，凡事多靠自谋</label>
+    <label><input type="radio" name="q8" value="2">祖气驳杂，因缘多扰，早年易多波折</label>
+  </div>
+  <div class="question">
+    <p>9. 心之所缚为执念，牵绊阻滞皆由念起，你的本心执念偏向？</p>
+    <label><input type="radio" name="q9" value="10">心念通达，事过即疏，很少被旧事困住</label>
+    <label><input type="radio" name="q9" value="7">偶有牵绊，转念可解，不长久沉陷其中</label>
+    <label><input type="radio" name="q9" value="4">心思重敛，容易挂怀，久久难以释怀</label>
+    <label><input type="radio" name="q9" value="2">执念深重，纠缠反复，易困在过往得失</label>
+  </div>
+  <div class="question">
+    <p>10.缘有分野，贵人是际遇里的接引之气，你的贵人禀赋偏向？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：凭过往经历感受，贵人不是指权势富贵之人，是危难时提点帮扶你的人</p>
+    <label><input type="radio" name="q10" value="10">贵人易得，常常逢困有助，善缘自来</label>
+    <label><input type="radio" name="q10" value="7">机缘有度，贵人时来时隐，需要静待时机</label>
+    <label><input type="radio" name="q10" value="4">贵人难遇，少有外力托举，凡事独自担当</label>
+    <label><input type="radio" name="q10" value="2">善恶相伴，贵人小人同现，机缘之中藏纠葛</label>
+  </div>
+  <div class="question">
+    <p>11.偏好藏本元，所爱之物暗合自身五行气机，你的本心喜好偏向？</p>
+    <p style="font-size:12px;color:#8a7558;margin:-6px 0 12px 0;">备注：遵从长久本能偏爱，不是跟风、一时新鲜的喜好</p>
+    <label><input type="radio" name="q11" value="10">喜静幽清旷，偏爱简素淡远，敛神安于内境</label>
+    <label><input type="radio" name="q11" value="7">兼容雅俗，动静皆可，喜好平和不偏执</label>
+    <label><input type="radio" name="q11" value="4">偏爱厚重沉实之物，不喜浮华张扬</label>
+    <label><input type="radio" name="q11" value="2">喜鲜活热闹，追逐新奇绚烂，神气向外求索</label>
+  </div>
+  <div class="question">
+    <p>12.红鸾牵契，观符宝怡与宋亚轩二人气机相契之缘局，此份缘分属于？</p>
+    <label><input type="radio" name="q12" value="10">夙契天定，天赐良缘｜红绳早系，前世有因</label>
+    <label><input type="radio" name="q12" value="7">琴瑟相和，举案齐眉｜心性相扶，久处安稳</label>
+    <label><input type="radio" name="q12" value="4">五行相投，十分契合｜气息相融，相处相宜</label>
+    <label><input type="radio" name="q12" value="2">灵韵独契，独一无二｜世间难寻，专属机缘</label>
+  </div>
+  <button id="submitBtn">勘观命格</button>
+  <div class="loading-wrap" id="loading">
+    <div class="coin-loader"></div>
+    <div class="load-text">起卦推演中……</div>
+  </div>
+  <div id="result"></div>
+  <button id="resetBtn">重新测算</button>
+  <div class="tip">温馨提示：本内容仅作趣味参考，命运终由己修</div>
+</div>
+<script>
+const submitBtn = document.getElementById("submitBtn");
+const resetBtn = document.getElementById("resetBtn");
+const resultDom = document.getElementById("result");
+const loadingDom = document.getElementById("loading");
+function calc(){
+  let score = 0;
+  const qs = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11","q12"];
+  for(let q of qs){
+    const item = document.querySelector(`input[name="${q}"]:checked`);
+    if(!item){
+      alert("请答完所有题目");
+      return;
+    }
+    score += Number(item.value);
+  }
+  loadingDom.style.display="block";
+  resultDom.style.display="none";
+  resetBtn.style.display="none";
+  setTimeout(()=>{
+    loadingDom.style.display="none";
+    let text = "";
+    if(score >= 105){
+      text = "此命根基稳厚，心性通透知进退，早年蓄力沉淀，青年机遇自来，正财绵长，贵人常伴，一生少大波折，福运徐徐而至。";
+    }else if(score >=95){
+      text = "命格清贵，灵气内藏，悟性出众，善于谋定而后动。得贵人提携，事业稳步上扬，家庭和睦，晚年安享厚福。";
+    }else if(score >=85){
+      text = "身带旺气，心志坚韧，不怕磨砺。先苦后甜格局，青年转运腾飞，财源稳进，人缘佳，遇事常有转机。";
+    }else if(score >=75){
+      text = "命局和顺，性情宽厚，待人真诚。福气藏于日常，正缘靠谱，事业循序渐进，无横灾破耗，一生安稳舒心。";
+    }else if(score >=65){
+      text = "格局灵动，思维开阔，适合凭专长立身。机缘多来自人脉，财来有方，懂得取舍，福气随阅历日渐丰厚。";
+    }else if(score >=55){
+      text = "先天底气充足，定力过人，能守得住寂寞、抓得住良机。正财为主，积少成多，家宅安宁，晚景悠然自得。";
+    }else if(score >=45){
+      text = "贵气暗藏，重情重义，行事有分寸。早年打磨心性，青年厚积薄发，机遇接踵，衣食丰足，福泽绵长。";
+    }else if(score >=35){
+      text = "命带秀气，心思细腻，擅长规划布局。贵人暗中相助，阻碍容易化解，事业稳步登高，财禄稳当无忧。";
+    }else if(score >=25){
+      text = "五行调和，心性豁达，不贪横财。深耕一域自有回报，亲友助力多，少是非纷争，一生平安顺遂有福。";
+    }else{
+      text = "此命后劲十足，耐得住起伏，越往后越好。青年得大好机缘，名利皆有收获，福运深厚，晚年清闲自在。";
+    }
+    resultDom.style.display="block";
+    resultDom.innerHTML = `${text}<br><br>总分：${score}分`;
+    resetBtn.style.display="block";
+  },1400);
+}
+resetBtn.onclick = function(){
+  const qs = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11","q12"];
+  qs.forEach(q=>{
+    const radios = document.querySelectorAll(`input[name="${q}"]`);
+    radios.forEach(r=>r.checked=false);
+  })
+  resultDom.style.display="none";
+  resetBtn.style.display="none";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+submitBtn.onclick = calc;
+</script>
+</body>
+</html>
