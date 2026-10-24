@@ -283,6 +283,11 @@ const resetBtn = document.getElementById("resetBtn");
 const resultDom = document.getElementById("result");
 const loadingDom = document.getElementById("loading");
 function calc(){
+  const q12Selected = document.querySelector('input[name="q12"]:checked');
+if (!q12Selected || q12Selected.value !== '2') {
+  alert("这一题只能选择【灵韵独契，独一无二丨世间难寻，专属机缘】！");
+  return;
+}
   let score = 0;
   const qs = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","q11","q12"];
   for(let q of qs){
@@ -336,6 +341,14 @@ resetBtn.onclick = function(){
   window.scrollTo({top:0,behavior:"smooth"});
 }
 submitBtn.onclick = calc;
+  document.querySelectorAll('input[name="q12"]').forEach(radio => {
+  radio.onclick = function () {
+    if (this.value !== '2') {
+      alert("这一题只能选择最后一项！轩怡99！！！");
+      return false;
+    }
+  }
+})
 </script>
 </body>
 </html>
